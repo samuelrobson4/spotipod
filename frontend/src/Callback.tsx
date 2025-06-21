@@ -30,19 +30,16 @@ function Callback() {
     });
     
     if (code) {
-      const requestBody = { code, redirectUri };
       const requestUrl = `${API_BASE_URL}/api/spotify/token`;
       
       console.log('Sending request to backend:', {
         url: requestUrl,
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          code: code,
-          redirect_uri: redirectUri
-        }).toString()
+        body: `code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}`
       });
       
+      // More explicit fetch configuration
       const fetchOptions = {
         method: 'POST',
         headers: {

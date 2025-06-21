@@ -1,10 +1,16 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
+const fs = require('fs').promises;
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Create data directory if it doesn't exist
+const dataDir = path.join(__dirname, 'data');
+fs.mkdir(dataDir, { recursive: true }).catch(console.error);
 
 const allowedOrigins = [
   'http://localhost:5173',
@@ -118,6 +124,80 @@ app.get('/api/spotify/recently-played', async (req, res) => {
     });
     res.json(response.data);
   } catch (error) {
+    res.status(500).json({ error: error.response?.data || error.message });
+  }
+});
+
+app.post('/api/user/library', async (req, res) => {
+  const { userId, playlists, albums } = req.body;
+  const accessToken = req.headers['authorization'];
+  
+  if (!accessToken || !userId) {
+    return res.status(400).json({ error: 'Missing access token or user ID' });
+  }
+
+  try {
+    // Verify the user ID by making a request to Spotify API
+    const userResponse = await axios.get('https://api.spotify.com/v1/me', {
+      headers: { 'Authorization': `Bearer ${accessToken}` },
+    });
+    
+    if (userResponse.data.id !== userId) {
+      return res.status(403).json({ error: 'User ID mismatch' });
+    }
+
+    const userData = {
+      userId,
+      playlists: playlists || [],
+      albums: albums || [],
+      lastUpdated: new Date().toISOString()
+    };
+
+    const filePath = path.join(dataDir, `${userId}.json`);
+    await fs.writeFile(filePath, JSON.stringify(userData, null, 2));
+    
+    res.json({ success: true, message: 'Library saved successfully' });
+  } catch (error) {
+    console.error('Error saving library:', error);
+    res.status(500).json({ error: error.response?.data || error.message });
+  }
+});
+
+app.get('/api/user/library/:userId', async (req, res) => {
+  const { userId } = req.params;
+  const accessToken = req.headers['authorization'];
+  
+  if (!accessToken || !userId) {
+    return res.status(400).json({ error: 'Missing access token or user ID' });
+  }
+
+  try {
+    // Verify the user ID by making a request to Spotify API
+    const userResponse = await axios.get('https://api.spotify.com/v1/me', {
+      headers: { 'Authorization': `Bearer ${accessToken}` },
+    });
+    
+    if (userResponse.data.id !== userId) {
+      return res.status(403).json({ error: 'User ID mismatch' });
+    }
+
+    const filePath = path.join(dataDir, `${userId}.json`);
+    
+    try {
+      const data = await fs.readFile(filePath, 'utf8');
+      const userData = JSON.parse(data);
+      res.json(userData);
+    } catch (fileError) {
+      // If file doesn't exist, return empty library
+      res.json({
+        userId,
+        playlists: [],
+        albums: [],
+        lastUpdated: new Date().toISOString()
+      });
+    }
+  } catch (error) {
+    console.error('Error loading library:', error);
     res.status(500).json({ error: error.response?.data || error.message });
   }
 });

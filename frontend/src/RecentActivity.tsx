@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { usePlayer } from './PlayerContext';
 
 interface RecentActivityProps {
-  handleImport: (playlist: any) => void;
-  handleImportAlbum: (album: any) => void;
-  handleRemove: (playlistId: string) => void;
-  handleRemoveAlbum: (albumId: string) => void;
+  handleImport: (playlist: any) => Promise<void>;
+  handleImportAlbum: (album: any) => Promise<void>;
+  handleRemove: (playlistId: string) => Promise<void>;
+  handleRemoveAlbum: (albumId: string) => Promise<void>;
   importedPlaylists: any[];
   importedAlbums: any[];
 }
@@ -188,7 +188,13 @@ function RecentActivity({
                   <div className="recent-item-type">Album</div>
                 </div>
                 <button
-                  onClick={() => isAlbumImported(album.id) ? handleRemoveAlbum(album.id) : handleImportAlbum(album)}
+                  onClick={async () => {
+                    if (isAlbumImported(album.id)) {
+                      await handleRemoveAlbum(album.id);
+                    } else {
+                      await handleImportAlbum(album);
+                    }
+                  }}
                   className={`import-btn ${isAlbumImported(album.id) ? 'imported' : ''}`}
                   title={isAlbumImported(album.id) ? 'Click to remove from library' : 'Add to library'}
                 >
@@ -215,7 +221,13 @@ function RecentActivity({
                   <div className="recent-item-type">Playlist</div>
                 </div>
                 <button
-                  onClick={() => isPlaylistImported(playlist.id) ? handleRemove(playlist.id) : handleImport(playlist)}
+                  onClick={async () => {
+                    if (isPlaylistImported(playlist.id)) {
+                      await handleRemove(playlist.id);
+                    } else {
+                      await handleImport(playlist);
+                    }
+                  }}
                   className={`import-btn ${isPlaylistImported(playlist.id) ? 'imported' : ''}`}
                   title={isPlaylistImported(playlist.id) ? 'Click to remove from library' : 'Add to library'}
                 >

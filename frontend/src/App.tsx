@@ -32,18 +32,77 @@ function AppContent() {
   } = usePlayer();
   const sdkLoaded = useRef(false);
 
-  // State for the library
-  const [importedPlaylists, setImportedPlaylists] = useState<any[]>(() => {
-    const saved = localStorage.getItem('imported_playlists');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [importedAlbums, setImportedAlbums] = useState<any[]>(() => {
-    const saved = localStorage.getItem('imported_albums');
-    return saved ? JSON.parse(saved) : [];
-  });
+  // State for user and library
+  const [userId, setUserId] = useState<string | null>(null);
+  const [importedPlaylists, setImportedPlaylists] = useState<any[]>([]);
+  const [importedAlbums, setImportedAlbums] = useState<any[]>([]);
   const [filter, setFilter] = useState<'all' | 'playlists' | 'albums'>('all');
   const [urlInput, setUrlInput] = useState('');
   const [urlError, setUrlError] = useState<string | null>(null);
+
+  // Load user data when token is available
+  useEffect(() => {
+    if (!token) return;
+    
+    const loadUserData = async () => {
+      try {
+        const response = await fetch('https://api.spotify.com/v1/me', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        if (response.ok) {
+          const userData = await response.json();
+          setUserId(userData.id);
+          
+          // Load user's library from backend
+          await loadUserLibrary(userData.id);
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    };
+    
+    loadUserData();
+  }, [token]);
+
+  // Load user library from backend
+  const loadUserLibrary = async (user: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/user/library/${user}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      if (response.ok) {
+        const libraryData = await response.json();
+        setImportedPlaylists(libraryData.playlists || []);
+        setImportedAlbums(libraryData.albums || []);
+      }
+    } catch (error) {
+      console.error('Error loading user library:', error);
+    }
+  };
+
+  // Save user library to backend
+  const saveUserLibrary = async () => {
+    if (!userId || !token) return;
+    
+    try {
+      await fetch(`${API_BASE_URL}/api/user/library`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          userId,
+          playlists: importedPlaylists,
+          albums: importedAlbums
+        }),
+      });
+    } catch (error) {
+      console.error('Error saving user library:', error);
+    }
+  };
 
   // Login
   const handleLogin = () => {
@@ -89,33 +148,33 @@ function AppContent() {
   }, [token, setPlayer, setDeviceId, setCurrentTrack, setIsPlaying, setProgress, setDuration, setIsShuffle]);
 
   // Library management
-  const handleImport = (playlist: any) => {
+  const handleImport = async (playlist: any) => {
     if (!importedPlaylists.find((p: any) => p.id === playlist.id)) {
-      setImportedPlaylists([...importedPlaylists, playlist]);
+      const newPlaylists = [...importedPlaylists, playlist];
+      setImportedPlaylists(newPlaylists);
+      await saveUserLibrary();
     }
   };
 
-  const handleRemove = (playlistId: string) => {
-    setImportedPlaylists(importedPlaylists.filter((p: any) => p.id !== playlistId));
+  const handleRemove = async (playlistId: string) => {
+    const newPlaylists = importedPlaylists.filter((p: any) => p.id !== playlistId);
+    setImportedPlaylists(newPlaylists);
+    await saveUserLibrary();
   };
 
-  const handleImportAlbum = (album: any) => {
+  const handleImportAlbum = async (album: any) => {
     if (!importedAlbums.find((a: any) => a.id === album.id)) {
-      setImportedAlbums([...importedAlbums, album]);
+      const newAlbums = [...importedAlbums, album];
+      setImportedAlbums(newAlbums);
+      await saveUserLibrary();
     }
   };
 
-  const handleRemoveAlbum = (albumId: string) => {
-    setImportedAlbums(importedAlbums.filter((a: any) => a.id !== albumId));
+  const handleRemoveAlbum = async (albumId: string) => {
+    const newAlbums = importedAlbums.filter((a: any) => a.id !== albumId);
+    setImportedAlbums(newAlbums);
+    await saveUserLibrary();
   };
-
-  useEffect(() => {
-    localStorage.setItem('imported_playlists', JSON.stringify(importedPlaylists));
-  }, [importedPlaylists]);
-
-  useEffect(() => {
-    localStorage.setItem('imported_albums', JSON.stringify(importedAlbums));
-  }, [importedAlbums]);
 
   const handleImportByUrl = async () => {
     setUrlError(null);
@@ -198,7 +257,7 @@ function AppContent() {
             
             if (foundPlaylist) {
               console.log('Found playlist in user playlists:', foundPlaylist.name);
-              handleImport(foundPlaylist);
+              await handleImport(foundPlaylist);
               setUrlInput('');
               return;
             }
@@ -220,7 +279,7 @@ function AppContent() {
                 
                 if (foundPlaylist) {
                   console.log('Found playlist via search:', foundPlaylist.name);
-                  handleImport(foundPlaylist);
+                  await handleImport(foundPlaylist);
                   setUrlInput('');
                   return;
                 }
@@ -243,7 +302,7 @@ function AppContent() {
               
               if (foundPlaylist) {
                 console.log('Found playlist in featured playlists:', foundPlaylist.name);
-                handleImport(foundPlaylist);
+                await handleImport(foundPlaylist);
                 setUrlInput('');
                 return;
               }
@@ -278,7 +337,7 @@ function AppContent() {
                     
                     if (foundPlaylist) {
                       console.log(`Found playlist in ${category} category:`, foundPlaylist.name);
-                      handleImport(foundPlaylist);
+                      await handleImport(foundPlaylist);
                       setUrlInput('');
                       return;
                     }
@@ -311,7 +370,7 @@ function AppContent() {
         
         data = await res.json();
         console.log('Successfully fetched playlist:', data.name);
-        handleImport(data);
+        await handleImport(data);
       } else if (type === 'album') {
         const res = await fetch(`https://api.spotify.com/v1/albums/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -335,7 +394,7 @@ function AppContent() {
         
         data = await res.json();
         console.log('Successfully fetched album:', data.name);
-        handleImportAlbum(data);
+        await handleImportAlbum(data);
       }
       setUrlInput('');
     } catch (e) {

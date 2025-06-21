@@ -14,11 +14,26 @@ function Callback() {
     const params = new URLSearchParams(location.search);
     const code = params.get('code');
     const redirectUri = window.location.origin + '/callback';
+    
+    console.log('Debug info:', {
+      API_BASE_URL,
+      code: code ? 'present' : 'missing',
+      redirectUri,
+      fullUrl: window.location.href,
+      searchParams: location.search
+    });
+    
     if (code) {
+      const requestBody = { code, redirectUri };
+      console.log('Sending request to backend:', {
+        url: `${API_BASE_URL}/api/spotify/token`,
+        body: requestBody
+      });
+      
       fetch(`${API_BASE_URL}/api/spotify/token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, redirectUri }),
+        body: JSON.stringify(requestBody),
       })
         .then(res => res.json())
         .then(data => {

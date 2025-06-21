@@ -40,9 +40,15 @@ app.get('/api/spotify/login', (req, res) => {
 
 app.post('/api/spotify/token', async (req, res) => {
   const { code, redirect_uri } = req.body;
-  console.log('Received code:', code);
-  console.log('Received redirect_uri:', redirect_uri);
+  console.log('Backend received request:', {
+    body: req.body,
+    code: code ? 'present' : 'missing',
+    redirect_uri: redirect_uri ? 'present' : 'missing',
+    headers: req.headers
+  });
+  
   if (!code || !redirect_uri) {
+    console.log('Missing parameters:', { code: !!code, redirect_uri: !!redirect_uri });
     return res.status(400).json({ error: 'Missing code or redirect_uri' });
   }
 

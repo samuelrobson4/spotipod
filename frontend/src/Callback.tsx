@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { usePlayer } from './PlayerContext';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://spotipod-backend.onrender.com';
 
 console.log('Environment check:', {
   VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
@@ -40,11 +40,19 @@ function Callback() {
         body: requestBody
       });
       
-      fetch(requestUrl, {
+      const fetchOptions = {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify(requestBody),
-      })
+        mode: 'cors' as RequestMode
+      };
+      
+      console.log('Fetch options:', fetchOptions);
+      
+      fetch(requestUrl, fetchOptions)
         .then(res => {
           console.log('Response received:', {
             status: res.status,

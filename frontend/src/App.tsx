@@ -390,6 +390,9 @@ function AppContent() {
               Login with Spotify
             </button>
             <p className="login-note">Free • No data collection • Your music, your way</p>
+            <p className="login-note" style={{ marginTop: '12px', color: '#aaa' }}>
+              API Target: {API_BASE_URL}
+            </p>
           </div>
         </div>
       </div>

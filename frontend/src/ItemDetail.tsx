@@ -42,15 +42,6 @@ function ItemDetail() {
     fetchData();
   }, [type, id, token]);
 
-  // Shuffle and play a random track
-  const shuffleAndPlay = () => {
-    if (tracks.length === 0) return;
-    const shuffled = [...tracks].sort(() => Math.random() - 0.5);
-    if (shuffled[0] && item?.uri) {
-      playTrack(item.uri, shuffled[0].uri);
-    }
-  };
-
   return (
     <div style={{ maxWidth: 700, margin: '60px auto 40px', padding: 24 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>

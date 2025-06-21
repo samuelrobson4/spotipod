@@ -1,6 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 import { Routes, Route, useNavigate, Link } from 'react-router-dom'
 import { PlayerProvider, usePlayer } from './PlayerContext'
@@ -33,7 +31,6 @@ function AppContent() {
     setIsShuffle
   } = usePlayer();
   const sdkLoaded = useRef(false);
-  const navigate = useNavigate();
 
   // State for the library
   const [importedPlaylists, setImportedPlaylists] = useState<any[]>(() => {

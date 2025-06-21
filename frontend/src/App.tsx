@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import './App.css'
-import { Routes, Route, useNavigate, Link } from 'react-router-dom'
+import { Routes, Route, Link } from 'react-router-dom'
 import { PlayerProvider, usePlayer } from './PlayerContext'
 import Library from './Library'
 import ItemDetail from './ItemDetail'

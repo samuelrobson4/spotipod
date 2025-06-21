@@ -1,0 +1,186 @@
+/* MiniPlayer.css - styling will be added back shortly */
+
+.mini-player {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box; /* Include padding in the width */
+  background: #f8f8f8;
+  border-top: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  padding: 12px 24px;
+  z-index: 1000;
+  gap: 20px;
+}
+
+.track-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0; /* Prevent track info from shrinking */
+}
+
+.track-info img {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
+}
+
+.track-name {
+  font-weight: 600;
+  font-size: 0.95em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.artist-name {
+  font-size: 0.85em;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-grow: 1; /* Allow this section to grow */
+  min-width: 0; /* Prevent overflow issues */
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+
+.control-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #333;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.control-btn.active {
+  color: #007aff; /* Apple blue */
+}
+
+.control-btn:hover {
+  background-color: #e5e5e5;
+}
+
+.control-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+.play-pause-btn {
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  width: 44px;
+  height: 44px;
+}
+
+.play-pause-btn svg {
+  width: 28px;
+  height: 28px;
+}
+
+.progress-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px; /* Constrain the progress bar width */
+}
+
+.progress-bar input[type="range"] {
+  width: 100%;
+  margin: 0;
+}
+
+.progress-time {
+  font-size: 0.75em;
+  color: #888;
+  white-space: nowrap;
+}
+
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+/* Custom Range Input Styles */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  background: #ccc;
+  height: 4px;
+  border-radius: 4px;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -6px;
+  background-color: #fff;
+  border: 1px solid #aaa;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+}
+input[type="range"]:focus::-webkit-slider-thumb {
+  outline: 3px solid #007aff;
+  outline-offset: 0.125rem;
+}
+
+@media (max-width: 768px) {
+  .mini-player {
+    padding: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .track-info {
+    order: 1;
+    flex-basis: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .artist-name {
+    display: none; /* Hide artist name on small screens */
+  }
+  
+  .controls {
+    order: 2;
+  }
+
+  .progress-bar {
+    order: 3;
+    width: 100%;
+  }
+
+  .volume-control {
+    order: 4;
+  }
+} 

@@ -36,17 +36,23 @@ function Callback() {
       console.log('Sending request to backend:', {
         url: requestUrl,
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: requestBody
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          code: code,
+          redirect_uri: redirectUri
+        }).toString()
       });
       
       const fetchOptions = {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
           'Accept': 'application/json'
         },
-        body: JSON.stringify(requestBody),
+        body: new URLSearchParams({
+          code: code,
+          redirect_uri: redirectUri
+        }).toString(),
         mode: 'cors' as RequestMode
       };
       

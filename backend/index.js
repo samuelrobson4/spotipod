@@ -25,6 +25,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.get('/api/spotify/login', (req, res) => {
   const { redirect_uri } = req.query;

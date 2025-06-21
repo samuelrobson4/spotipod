@@ -4,6 +4,12 @@ import { usePlayer } from './PlayerContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
+console.log('Environment check:', {
+  VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+  API_BASE_URL,
+  NODE_ENV: import.meta.env.NODE_ENV
+});
+
 function Callback() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -25,18 +31,30 @@ function Callback() {
     
     if (code) {
       const requestBody = { code, redirectUri };
+      const requestUrl = `${API_BASE_URL}/api/spotify/token`;
+      
       console.log('Sending request to backend:', {
-        url: `${API_BASE_URL}/api/spotify/token`,
+        url: requestUrl,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: requestBody
       });
       
-      fetch(`${API_BASE_URL}/api/spotify/token`, {
+      fetch(requestUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
       })
-        .then(res => res.json())
+        .then(res => {
+          console.log('Response received:', {
+            status: res.status,
+            statusText: res.statusText,
+            headers: Object.fromEntries(res.headers.entries())
+          });
+          return res.json();
+        })
         .then(data => {
+          console.log('Response data:', data);
           if (data.access_token) {
             localStorage.setItem('spotify_access_token', data.access_token);
             setToken(data.access_token);
@@ -45,7 +63,10 @@ function Callback() {
             setMessage('Failed to get access token: ' + (data.error?.error_description || JSON.stringify(data)));
           }
         })
-        .catch(err => setMessage('Error: ' + err.message));
+        .catch(err => {
+          console.error('Fetch error:', err);
+          setMessage('Error: ' + err.message);
+        });
     } else {
       setMessage('No authorization code found in URL.');
     }

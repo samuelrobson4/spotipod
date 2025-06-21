@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { usePlayer } from './PlayerContext';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+
 function Callback() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -11,9 +13,9 @@ function Callback() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const code = params.get('code');
-    const redirectUri = 'http://127.0.0.1:5173/callback';
+    const redirectUri = window.location.origin + '/callback';
     if (code) {
-      fetch('http://localhost:3001/api/spotify/token', {
+      fetch(`${API_BASE_URL}/api/spotify/token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code, redirectUri }),
